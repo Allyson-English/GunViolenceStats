@@ -90,10 +90,13 @@ update_table(db_path, page = 16)
 engine = sqlalchemy.create_engine(f'sqlite:///{db_path}')
 
 # Query can be run to ensure that duplicates do not exist in database
+
 with engine.connect() as conn:
-    query1 = """SELECT * FROM gun_violence;"""
+    query1 = """SELECT COUNT(*) FROM gun_violence;"""
     df1 = pd.read_sql(query1, conn)
-    query2 = """SELECT DISTINCT * FROM gun_violence;"""
-    df2 = pd.read_sql(query2, conn)
     
-df1 = df2
+
+if not df1.duplicated()[0]:
+    print(df1['COUNT(*)'][0], "entries")
+else:
+    print("Duplicates")
