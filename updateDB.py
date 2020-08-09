@@ -1,15 +1,12 @@
+from headers import headers
+from headers import db_path
 import requests
 import pandas as pd
 import sqlalchemy
 from sqlalchemy import Table, Column, Integer, String, MetaData
 
-db_path = '.../gunviolence.db'
-
 ### Update Table Function
 def update_table(db_pathway, page = 0):
-    
-    # Change headers to make it less obvious to site that this is scraping
-    headers = {'User-Agent': '...'}
     
     # Scrape data from website
     
@@ -25,9 +22,12 @@ def update_table(db_pathway, page = 0):
         df.columns = ['date', 'state', 'city', 'address', 'killed', 'injured']
 
         for i in range(len(df)):
-            clean = str(df['address'][i])
-            clean = clean.replace("'","")
-            df['address'][i] = clean
+            clean_add = str(df['address'][i])
+            clean_city = str(df['city'][i])
+            clean_add = clean_add.replace("(","").replace(",","").replace("'","").replace(")","")
+            clean_city = clean_city.replace("(","").replace(",","").replace("'","").replace(")","")
+            df.loc[i, 'address'] = clean_add
+            df.loc[i, 'city'] = clean_city
 
         newrow_insert(db_pathway, df)
     
@@ -92,11 +92,10 @@ engine = sqlalchemy.create_engine(f'sqlite:///{db_path}')
 # Query can be run to ensure that duplicates do not exist in database
 
 with engine.connect() as conn:
-    query1 = """SELECT COUNT(*) FROM gun_violence;"""
+    query1 = """SELECT * FROM gun_violence;"""
     df1 = pd.read_sql(query1, conn)
     
-
-if not df1.duplicated()[0]:
-    print(df1['COUNT(*)'][0], "entries")
+if not df1.duplicated().unique()[0]:
+    print(len(df1))
 else:
-    print("Duplicates")
+    print("There are duplicates")
