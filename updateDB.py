@@ -2,11 +2,12 @@ from headers import headers
 from headers import db_path
 import requests
 import pandas as pd
+import sqlite3
 import sqlalchemy
 from sqlalchemy import Table, Column, Integer, String, MetaData
 
 ### Update Table Function
-def update_table(db_pathway, page = 0):
+def update_table(db_pathway, page = 10):
     
     # Scrape data from website
     
@@ -30,6 +31,40 @@ def update_table(db_pathway, page = 0):
             df.loc[i, 'city'] = clean_city
 
         newrow_insert(db_pathway, df)
+        
+### If duplicate date exists, delete 
+def delete_duplicate(db_path, date_temp, state_temp, city_temp, address_temp):
+    
+    sqliteConnection = sqlite3.connect(db_path)
+
+    try:
+        cursor = sqliteConnection.cursor()
+
+        del_statement = f"""DELETE FROM gun_violence WHERE date = '{date_temp}'  AND state = '{state_temp}'  AND city = '{city_temp}'  AND address = '{address_temp}';"""
+        cursor.execute(del_statement)
+        sqliteConnection.commit()
+        cursor.close()
+
+    except sqlite3.Error as error:
+        print("Failed to delete record from sqlite table", error)
+    finally:
+        if (sqliteConnection):
+            sqliteConnection.close()
+    
+### After ensuring the row will not be a duplicate, add new row 
+def add_row(metadata, gun_violence, engine, date_temp, state_temp, city_temp, address_temp, killed_temp, injured_temp):
+    
+    metadata.create_all(engine)
+    
+    ins = gun_violence.insert().values(date = date_temp, 
+                                   state = state_temp, 
+                                   city = city_temp, 
+                                   address = address_temp, 
+                                   killed = int(killed_temp), 
+                                   injured = int(injured_temp))
+
+    with engine.connect() as conn:
+        conn.execute(ins)
     
     
 ### Insert Rows SQL Function
@@ -53,34 +88,32 @@ def newrow_insert(db_pathway, data):
     # This successfully avoids adding duplicate rows
 
     for row in range(len(data)):
-        date_temp = data['date'][row]
-        state_temp = data['state'][row]
-        city_temp = data['city'][row]
-        address_temp = data['address'][row]
-        killed_temp = data['killed'][row]
-        injured_temp = data['injured'][row]
+            date_temp = data['date'][row]
+            state_temp = data['state'][row]
+            city_temp = data['city'][row]
+            address_temp = data['address'][row]
+            killed_temp = data['killed'][row]
+            injured_temp = data['injured'][row]
 
-        with engine.connect() as conn:
-            query = f"""SELECT *
-            FROM gun_violence
-            WHERE date = '{date_temp}' 
-            AND state = '{state_temp}' 
-            AND city = '{city_temp}' 
-            AND address = '{address_temp}';"""
+            with engine.connect() as conn:
+                query = f"""SELECT *
+                FROM gun_violence
+                WHERE date = '{date_temp}' 
+                AND state = '{state_temp}' 
+                AND city = '{city_temp}' 
+                AND address = '{address_temp}';"""
 
-            df = pd.read_sql(query, conn)
+                df = pd.read_sql(query, conn)
 
-            if df.empty == True:
+                if df.empty == True:
 
-                ins = gun_violence.insert().values(date = date_temp, 
-                                                   state = state_temp, 
-                                                   city = city_temp, 
-                                                   address = address_temp, 
-                                                   killed = int(killed_temp), 
-                                                   injured = int(injured_temp))
+                    add_row(metadata, gun_violence, engine, date_temp, state_temp, city_temp, address_temp, killed_temp, injured_temp)
 
-                with engine.connect() as conn:
-                    conn.execute(ins)
+                elif df['killed'][0] != killed_temp or df['injured'][0] != injured_temp:
+
+                    delete_duplicate(db_path, date_temp, state_temp, city_temp, address_temp)
+
+                    add_row(metadata, gun_violence, engine, date_temp, state_temp, city_temp, address_temp, killed_temp, injured_temp)
 
                     
                     
