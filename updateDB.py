@@ -66,9 +66,7 @@ def newrow_insert(db_pathway, data):
             WHERE date = '{date_temp}' 
             AND state = '{state_temp}' 
             AND city = '{city_temp}' 
-            AND address = '{address_temp}' 
-            AND killed = '{killed_temp}' 
-            AND injured = '{injured_temp}';"""
+            AND address = '{address_temp}';"""
 
             df = pd.read_sql(query, conn)
 
@@ -86,7 +84,7 @@ def newrow_insert(db_pathway, data):
 
                     
                     
-update_table(db_path, page = 16)
+update_table(db_path, 18)
 engine = sqlalchemy.create_engine(f'sqlite:///{db_path}')
 
 # Query can be run to ensure that duplicates do not exist in database
