@@ -52,15 +52,14 @@ def index():
         query = f"SELECT * FROM gun_violence WHERE date = '{today}' OR date = '{yesterday}';"
         df = pd.read_sql(query, conn)
 
-    df = df.sort_values(by = 'date', ascending = False)
+    df = df.sort_values(by = 'date', ascending = True)
 
     df_len = len(df)
     deaths = df["killed"].sum()
     injuries = df["injured"].sum()
     states = len(df["state"].unique())
-    x = datetime.datetime.now().strftime("%B %d, %Y")
 
-    return render_template("index.html", df=df, df_len=df_len, x=x, deaths=deaths, injuries=injuries, states=states)
+    return render_template("index.html", df=df, df_len=df_len, today=today, deaths=deaths, injuries=injuries, states=states)
 
 
 @app.route("/testing")
