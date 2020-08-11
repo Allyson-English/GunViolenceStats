@@ -18,28 +18,44 @@ if False:
     df = df[0].reset_index().drop(columns=["Operations"])
     df.columns = ["date", "state", "city", "address", "killed", "injured"]
 
-
 app = Flask(__name__)
 
 
 @app.route("/")
 def index():
-    headers = headers
+    
+    today_month = datetime.datetime.today()
+    today_month = today_month.strftime('%B')
 
-    url = "https://www.gunviolencearchive.org/last-72-hours"
+    today_date = datetime.datetime.today()
+    today_date = int(today_date.strftime('%d'))
 
-    page = requests.get(url, headers=headers)
-    page = page.text
+    today_year = datetime.datetime.today()
+    today_year = today_year.strftime('%Y')
 
-    df = pd.read_html(page, header=0, index_col=0)
-    df = df[0].reset_index().drop(columns=["Operations"])
-    df.columns = ["date", "state", "city", "address", "killed", "injured"]
+    yesterday_date = datetime.datetime.today() - datetime.timedelta(days=1)
+    yesterday_date = int(yesterday_date.strftime('%d'))
 
-    for i in range(0, len(df)):
-        if df["killed"][i] == 0 and df["injured"][i] == 0:
-            df = df.drop([i])
+    yesterday_month = datetime.datetime.today() - datetime.timedelta(days=1)
+    yesterday_month = yesterday_month.strftime('%B')
 
-    df = df.reset_index()
+    yesterday_year = datetime.datetime.today() - datetime.timedelta(days=1)
+    yesterday_year = yesterday_year.strftime('%Y')
+
+    today = f"{today_month} {today_date}, {today_year}"
+    yesterday = f"{yesterday_month} {yesterday_date}, {yesterday_year}"
+    
+    db_path = db_path
+    engine = sqlalchemy.create_engine(f"sqlite:///{db_path}")
+    
+    with engine.connect() as conn:
+        query = f"SELECT * FROM gun_violence WHERE date = '{today}' OR date = '{yesterday}';"
+        df = pd.read_sql(query, conn)
+
+    df = df.sort_values(by = 'date', ascending = False)
+
+    df_len = len(df_len)
+
     df_len = len(df)
     deaths = df["killed"].sum()
     injuries = df["injured"].sum()
