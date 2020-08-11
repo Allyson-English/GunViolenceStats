@@ -1,3 +1,5 @@
+from headers import headers
+from headers import db_path
 from flask import Flask, render_template
 from bs4 import BeautifulSoup
 import pandas as pd
