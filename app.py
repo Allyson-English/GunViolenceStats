@@ -1,5 +1,4 @@
-from headers import headers
-from headers import db_path
+from headers import headers, db_path
 from flask import Flask, render_template
 from bs4 import BeautifulSoup
 import pandas as pd
@@ -47,7 +46,6 @@ def index():
     today = f"{today_month} {today_date}, {today_year}"
     yesterday = f"{yesterday_month} {yesterday_date}, {yesterday_year}"
     
-    db_path = db_path
     engine = sqlalchemy.create_engine(f"sqlite:///{db_path}")
     
     with engine.connect() as conn:
@@ -55,8 +53,6 @@ def index():
         df = pd.read_sql(query, conn)
 
     df = df.sort_values(by = 'date', ascending = False)
-
-    df_len = len(df_len)
 
     df_len = len(df)
     deaths = df["killed"].sum()
@@ -69,7 +65,7 @@ def index():
 
 @app.route("/testing")
 def testing():
-    db_path = db_path
+
     engine = sqlalchemy.create_engine(f"sqlite:///{db_path}")
 
     with engine.connect() as conn:
