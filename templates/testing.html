@@ -9,6 +9,12 @@
 <body>
     <div class="pagewidth">
 
+        <select name=colours method="GET" action="/">
+            {% for state in state_names %}
+            <option value="{{state}}" SELECTED>{{state}}</option>"
+            {% endfor %}
+        </select>
+
         <center>
             <div class="flex-container">
                 {% for i in range(0, dc_df_len) %}
