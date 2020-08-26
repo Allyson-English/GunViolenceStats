@@ -77,7 +77,7 @@ def testing():
     engine = sqlalchemy.create_engine(f"sqlite:///{db_path}")
 
     with engine.connect() as conn:
-        query1 = """SELECT * FROM gun_violence WHERE state = 'New York';"""
+        query1 = """SELECT * FROM gun_violence WHERE city = 'Washington';"""
         dc_df = pd.read_sql(query1, conn)
 
     dc_df_len = len(dc_df)
