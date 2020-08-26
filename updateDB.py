@@ -1,5 +1,4 @@
-from headers import headers
-from headers import db_path
+from headers import headers, db_path
 import requests
 import pandas as pd
 import sqlite3
@@ -31,6 +30,7 @@ def update_table(db_pathway, page = 10):
             df.loc[i, 'city'] = clean_city
 
         newrow_insert(db_pathway, df)
+    
         
 ### If duplicate date exists, delete 
 def delete_duplicate(db_path, date_temp, state_temp, city_temp, address_temp):
@@ -69,7 +69,6 @@ def add_row(metadata, gun_violence, engine, date_temp, state_temp, city_temp, ad
     
 ### Insert Rows SQL Function
 def newrow_insert(db_pathway, data):
-    
     
     # Define database pathway and establish SQL connection
     # Add echo = True after the sql path argument to see a print out of the SQL being executed
@@ -117,7 +116,7 @@ def newrow_insert(db_pathway, data):
 
                     
                     
-update_table(db_path, 18)
+update_table(db_path)
 engine = sqlalchemy.create_engine(f'sqlite:///{db_path}')
 
 # Query can be run to ensure that duplicates do not exist in database
