@@ -1,32 +1,44 @@
-* {
-    background-color: #F8F8F8;
-}
-
-h1 {
-    font-family: "Fjord One"; 
-    font-size: 48px; 
-    font-style: normal; 
-    font-variant: normal; 
-    font-weight: 2; 
-    line-height:1.0em;
-    padding: 1px;
-    width: 75%;
+html, body {
+    background-color: black;
+    max-width: 100%;
+    overflow-x: hidden;
+    justify-content: center;
     margin: auto;
-    padding: 50px;
-    }
+    width: 1500px; 
+  }
 
 counter {
     font-family: "Fjord One"; 
-    font-size: 48px; 
+    font-size: 90%; 
     font-style: normal; 
     font-variant: normal; 
     font-weight: 2; 
     line-height:1.0em;
-    color: #F8F8F8;
-    background-color: black;
+    color:black;
+    background-color:#F8F8F8;
     border-radius: 4px;
-    margin-bottom: 10px;
-    padding: .1%;
+    margin-bottom: 0%;
+    padding: 0.1%;
+    }
+
+.headline {
+    margin-top: 12%;
+    font-family: "Fjord One"; 
+    font-size: 400%; 
+    font-weight: 2; 
+    /* padding: 50px; */
+    color: #F8F8F8;
+    margin-bottom: 5%;
+    }
+
+.mystate {
+    font-family: "Fjord One"; 
+    font-size: 150%; 
+    font-weight: 2; 
+    color: #F8F8F8;
+    margin: 10%;
+    margin-top: 2%;
+    margin-bottom: 2%;
     }
 
 h2 {
@@ -39,20 +51,14 @@ h2 {
     padding: 4px;
     }
 
-todays_numbers {
+.todays_numbers {
     font-family: "Fjord One"; 
-    font-size: 24px; 
-    font-style: normal; 
-    font-variant: normal; 
-    font-weight: 200; 
-    line-height: 26.4px; 
-    color: white;
-    background-color: black;
-    border-radius: 4px;
-    padding: 1.5px;
-    padding-right: 4px;
-    padding-left: 4px;
-    margin-bottom: 0px;
+    font-size: 200%; 
+    font-weight: 2; 
+    color: #F8F8F8;
+    margin: 10%;
+    margin-top: 2%;
+    margin-bottom: 2%;
     }
 
 h4 {
