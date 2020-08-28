@@ -8,17 +8,24 @@
 
 <body>
     <div class="pagewidth">
-        <h1>It has been <counter>zero days</counter> since the last incident of gun violence in the United
+        <div class="headline">
+            It has been <counter>zero days</counter> since the last incident of gun violence in the United
             States.
-        </h1>
 
-        <todays_numbers>{{ today }}: In the past 24 hours, across {{ states }} states, there have been at least {{ deaths }} deaths
+        </div>
+
+        <div class="todays_numbers"><b>{{ today }}</b>: In the past 24 hours, across {{ states }} states,
+            there have been at
+            least
+            {{ deaths }} deaths
             and
             {{ injuries }} injuries attributed to
-            gun violence.</todays_numbers>
+            gun violence.</div>
         <br /><br />
 
-        <h4><i><b>Recent incidents include:</b></i></h4>
+        <div class="mystate">
+            Use the drop down menu to check how your state compares.
+        </div>
 
         <center>
             <div class="flex-container">
