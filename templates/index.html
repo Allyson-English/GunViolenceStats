@@ -29,9 +29,9 @@
 
         <center>
             <div class="flex-container">
-                {% for i in range(0, df_len) %}
-                <div>{{ df['city'][i] }}, {{ df['state'][i] }}<br /><br />
-                    Fatalities: {{ df['killed'][i] }} Injuries: {{ df['injured'][i] }}</div>
+                {% for i in df.index %}
+                <div>{{ df.loc[i, 'state'] }}<br /><br />
+                    Fatalities: {{ df.loc[i, 'killed'] }} Injuries: {{ df.loc[i, 'injured'] }}</div>
                 {% endfor %}
             </div>
         </center>

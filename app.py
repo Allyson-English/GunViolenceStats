@@ -41,17 +41,15 @@ def index():
     engine = sqlalchemy.create_engine(f"sqlite:///{db_path}")
     
     with engine.connect() as conn:
-        query = f"SELECT * FROM gun_violence WHERE city = 'Washington' AND date = '{today}' OR city = 'Washington' AND date = '{yesterday}';"
+        query = f"SELECT * FROM gun_violence WHERE date = '{today}' OR date = '{yesterday}' GROUP BY state;"
         df = pd.read_sql(query, conn)
 
-    df = df.sort_values(by = 'state', ascending=True)
-
-    df_len = len(df)
+    test = df.columns
+    states = len(df)
     deaths = df["killed"].sum()
     injuries = df["injured"].sum()
-    states = len(df["state"].unique())
-
-    return render_template("index.html", df=df, df_len=df_len, today=today, deaths=deaths, injuries=injuries, states=states)
+    
+    return render_template("index.html", df=df, states=states, today=today, deaths=deaths, injuries=injuries, test=test)
 
 
 @app.route("/testing")
