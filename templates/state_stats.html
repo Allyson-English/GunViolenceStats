@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='main.css') }}" />
+    <title>Preventable Gun Deaths WebApp</title>
+</head>
+
+<body>
+    <div class="pagewidth">
+
+        <center>
+            <div class="flex-container">
+                {% for i in range(0, dc_df_len) %}
+                <div>{{ dc_df['city'][i] }}, {{ dc_df['state'][i] }}<br /><br />
+                    Fatalities: {{ dc_df['killed'][i] }} Injuries: {{ dc_df['injured'][i] }}</div>
+                {% endfor %}
+            </div>
+        </center>
+
+</body>
+
+</html>

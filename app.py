@@ -53,7 +53,7 @@ def state_stats(state):
 
     dc_df_len = len(dc_df)
 
-    return render_template("testing.html", dc_df=dc_df, dc_df_len=dc_df_len, state_names=state_names)
+    return render_template("state_stats.html", dc_df=dc_df, dc_df_len=dc_df_len)
 
 
 @app.route("/testing")
