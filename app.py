@@ -42,6 +42,20 @@ def index():
     return render_template("index.html", df=df, states=states, today=today, deaths=deaths, injuries=injuries, test=test)
 
 
+@app.route("/<state>")
+def state_stats(state):
+
+    engine = sqlalchemy.create_engine(f"sqlite:///{db_path}")
+
+    with engine.connect() as conn:
+        query1 = f"""SELECT * FROM gun_violence WHERE state = '{state}';"""
+        dc_df = pd.read_sql(query1, conn)
+
+    dc_df_len = len(dc_df)
+
+    return render_template("testing.html", dc_df=dc_df, dc_df_len=dc_df_len, state_names=state_names)
+
+
 @app.route("/testing")
 def testing():
 
