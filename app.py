@@ -1,9 +1,10 @@
 from headers import db_path
-from flask import Flask, render_template
+from flask import Flask, render_template, request, jsonify
 from bs4 import BeautifulSoup
 import pandas as pd
 import requests
 import datetime
+from flask_sqlalchemy import SQLalchemy
 import sqlalchemy
 from sqlalchemy import Table, Column, Integer, String, MetaData
 
@@ -20,6 +21,7 @@ if False:
     df.columns = ["date", "state", "city", "address", "killed", "injured"]
 
 app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE'] = ''
 
 
 @app.route("/")
