@@ -84,7 +84,7 @@ h4 {
 .flex-container {
     display: flex;
     flex-wrap: wrap;
-    background-color: #F8F8F8;
+    background-color: black;
   }
   
 .flex-container > div {
@@ -99,6 +99,7 @@ line-height:1.1em;
 font-size: 30px;
 color: white;
 padding: 10px;
-box-shadow: 5px 10px #9e9d9d;
+border-bottom: 4px solid white;
+box-shadow: 5px 10px black;
 border-radius: 8px;
 }

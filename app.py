@@ -4,25 +4,10 @@ from bs4 import BeautifulSoup
 import pandas as pd
 import requests
 import datetime
-from flask_sqlalchemy import SQLalchemy
 import sqlalchemy
 from sqlalchemy import Table, Column, Integer, String, MetaData
 
-if False:
-    headers = headers
-
-    url = "https://www.gunviolencearchive.org/last-72-hours"
-
-    page = requests.get(url, headers=headers)
-    page = page.text
-
-    df = pd.read_html(page, header=0, index_col=0)
-    df = df[0].reset_index().drop(columns=["Operations"])
-    df.columns = ["date", "state", "city", "address", "killed", "injured"]
-
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE'] = ''
-
 
 @app.route("/")
 def index():
@@ -43,7 +28,10 @@ def index():
     engine = sqlalchemy.create_engine(f"sqlite:///{db_path}")
     
     with engine.connect() as conn:
-        query = f"SELECT * FROM gun_violence WHERE date = '{today}' OR date = '{yesterday}' GROUP BY state;"
+        query = f"""SELECT * FROM gun_violence
+        WHERE date = '{today}' AND killed > 0 OR date = '{today}' AND injured > 0
+        OR date = '{yesterday}' AND killed > 0 OR date = '{yesterday}' AND injured > 0
+        GROUP BY state;"""
         df = pd.read_sql(query, conn)
 
     test = df.columns
