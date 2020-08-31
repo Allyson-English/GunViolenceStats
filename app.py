@@ -47,12 +47,10 @@ def state_stats(state):
 
     engine = sqlalchemy.create_engine(f"sqlite:///{db_path}")
 
-    if f"{state}" == "NewYork":
-        state = "New York"
-
 
     with engine.connect() as conn:
-        query1 = f"""SELECT * FROM gun_violence WHERE state = '{state}';"""
+        query1 = f"""SELECT * FROM gun_violence WHERE state IN
+                    (SELECT state from state_names WHERE abbreviations = '{state}');"""
         dc_df = pd.read_sql(query1, conn)
 
 
