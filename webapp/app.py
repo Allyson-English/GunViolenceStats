@@ -88,5 +88,9 @@ def testing():
     return render_template("testing.html", dc_df=dc_df, dc_df_len=dc_df_len, state_names=state_names)
 
 
+@app.route("/tester")
+def tester():
+    return "Hello, world!"
+
 if __name__ == "__main__":
     app.run(debug=True)
