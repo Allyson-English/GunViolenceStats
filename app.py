@@ -1,8 +1,6 @@
 from headers import db_path
 from flask import Flask, render_template, request, jsonify
-from bs4 import BeautifulSoup
 import pandas as pd
-import requests
 import datetime
 import sqlalchemy
 from sqlalchemy import Table, Column, Integer, String, MetaData
