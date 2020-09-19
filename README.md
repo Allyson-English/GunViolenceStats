@@ -1,5 +1,7 @@
 # GunViolenceStats
 
+Check out the site here: http://zerodays.live/
+(It's still a work in progress!)
 
 It's been zero days since the last incident of gun violence in the United States.
 
@@ -14,10 +16,10 @@ To Do (Proof of Concept):
 
 
 To Do (MVP):
-- [ ] Create a drop down menu for web users to choose their state (and city?) that queries database
 - [ ] Purchase domain name and host site 
+- [ ] Create a drop down menu for web users to choose their state (and city?) that queries database
 
 Notes:
 - Include census data in database?
-- How to set up a scheduler through Github?
+- How to set up a scheduler on AWS instance
  
