@@ -23,16 +23,6 @@
             gun violence.</div>
         <br /><br />
 
-        <div class="mystate">
-            Use the drop down menu to check how your state compares.
-
-            <select name=colours method="GET" action="/">
-                {% for state in state_names %}
-                <option value="{{state}}" SELECTED>{{state}}</option>"
-                {% endfor %}
-            </select>
-        </div>
-
         <center>
             <div class="flex-container">
                 {% for i in df.index %}

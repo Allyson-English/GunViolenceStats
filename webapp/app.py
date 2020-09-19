@@ -1,7 +1,8 @@
 from headers import db_path
 from flask import Flask, render_template, request, jsonify
 import pandas as pd
-import datetime
+from datetime import datetime, timedelta
+from dateutil import tz
 import sqlalchemy
 from sqlalchemy import Table, Column, Integer, String, MetaData
 
@@ -10,12 +11,14 @@ app = Flask(__name__)
 @app.route("/")
 def index():
     
-    today = datetime.datetime.today()
+    DC_tz = tz.gettz("US/Eastern")
+    today = datetime.now(tz=DC_tz)
+    
     today_month = today.strftime('%B')
     today_date = int(today.strftime('%d'))
     today_year = today.strftime('%Y')
 
-    yesterday = datetime.datetime.today() - datetime.timedelta(days=1)
+    yesterday = today - timedelta(days=1)
     yesterday_month = yesterday.strftime('%B')
     yesterday_date = int(yesterday.strftime('%d'))
     yesterday_year = yesterday.strftime('%Y')
