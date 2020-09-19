@@ -16,7 +16,7 @@ To Do (Proof of Concept):
 
 
 To Do (MVP):
-- [ ] Purchase domain name and host site 
+- [x] Purchase domain name and host site 
 - [ ] Create a drop down menu for web users to choose their state (and city?) that queries database
 
 Notes:
