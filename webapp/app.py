@@ -36,11 +36,13 @@ def index():
         df = pd.read_sql(query, conn)
 
     test = df.columns
-    states = len(df)
+    states_count = len(df)
+    states_names = df["state"].unique()
     deaths = df["killed"].sum()
     injuries = df["injured"].sum()
     
-    return render_template("index.html", df=df, states=states, today=today, deaths=deaths, injuries=injuries, test=test)
+    return render_template("index.html", df=df, states_count=states_count, states_names=states_names,
+                           today=today, deaths=deaths, injuries=injuries, test=test)
 
 
 @app.route("/<state>")

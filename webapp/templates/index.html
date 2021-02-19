@@ -14,7 +14,7 @@
 
         </div>
 
-        <div class="todays_numbers"><b>{{ today }}</b>: In the past 24 hours, across {{ states }} states,
+        <div class="todays_numbers"><b>{{ today }}</b>: In the past 24 hours, across {{ states_count }} states,
             there have been at
             least
             {{ deaths }} deaths
@@ -24,12 +24,15 @@
         <br /><br />
 
         <center>
+
+	    <div class="boundary">
             <div class="flex-container">
-                {% for i in df.index %}
-                <div>{{ df.loc[i, 'state'] }}<br /><br />
-                    Fatalities: {{ df.loc[i, 'killed'] }} Injuries: {{ df.loc[i, 'injured'] }}</div>
+                {% for i in states_names %}
+                <div>{{ i }}<br /><br />
+                    Fatalities: {{ df[df.state == i]['killed'].sum() }} Injuries: {{ df[df.state == i]['injured'].sum() }}</div>
                 {% endfor %}
             </div>
+	    </div>
         </center>
 
 

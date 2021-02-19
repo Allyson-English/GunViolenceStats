@@ -33,9 +33,9 @@ def update_table(db_pathway, page = 10):
     
         
 ### If duplicate date exists, delete 
-def delete_duplicate(db_path, date_temp, state_temp, city_temp, address_temp):
+def delete_duplicate(db_pathway, date_temp, state_temp, city_temp, address_temp):
     
-    sqliteConnection = sqlite3.connect(db_path)
+    sqliteConnection = sqlite3.connect(db_pathway)
 
     try:
         cursor = sqliteConnection.cursor()
@@ -53,7 +53,7 @@ def delete_duplicate(db_path, date_temp, state_temp, city_temp, address_temp):
     
 ### After ensuring the row will not be a duplicate, add new row 
 def add_row(metadata, gun_violence, engine, date_temp, state_temp, city_temp, address_temp, killed_temp, injured_temp):
-    
+
     metadata.create_all(engine)
     
     ins = gun_violence.insert().values(date = date_temp, 
@@ -69,7 +69,7 @@ def add_row(metadata, gun_violence, engine, date_temp, state_temp, city_temp, ad
     
 ### Insert Rows SQL Function
 def newrow_insert(db_pathway, data):
-    
+
     # Define database pathway and establish SQL connection
     # Add echo = True after the sql path argument to see a print out of the SQL being executed
 
