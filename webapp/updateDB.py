@@ -6,7 +6,7 @@ import sqlalchemy
 from sqlalchemy import Table, Column, Integer, String, MetaData
 
 ### Update Table Function
-def update_table(db_pathway, page = 10):
+def update_table(db_pathway, page = 5):
     
     # Scrape data from website
     
@@ -113,6 +113,8 @@ def newrow_insert(db_pathway, data):
                     delete_duplicate(db_path, date_temp, state_temp, city_temp, address_temp)
 
                     add_row(metadata, gun_violence, engine, date_temp, state_temp, city_temp, address_temp, killed_temp, injured_temp)
+                else:
+                    pass
 
                     
                     
