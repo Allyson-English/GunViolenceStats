@@ -7,10 +7,21 @@ from datetime import datetime, timedelta
 from dateutil import tz
 import tweet_generator 
 from sqlalchemy import Table, Column, Integer, String, MetaData
+import tweepy
+# from headers import twitter_api_key, twitter_api_key_secret, twitter_access_token, twitter_token_secret
+
+#  Note: when these are sent from my own twitter, I get banned for sending too many unsolicited tweets directly at people.
+#  Solution: create a "tweet this" button that allows website visitors to tweet at reps from their own accounts after selecting the state and rep they want to contact
+
 
 engine = sqlalchemy.create_engine(f'sqlite:///{db_path}')
 
-def create_tweet(engine, state, statement):
+auth = tweepy.OAuthHandler(twitter_api_key, twitter_api_key_secret)
+auth.set_access_token(twitter_access_token, twitter_token_secret)
+
+api = tweepy.API(auth)
+
+def create_tweet(engine, state, statement, api):
     
     tweets = []
     
@@ -27,10 +38,11 @@ def create_tweet(engine, state, statement):
             pass
         
         else:
-            t = f"{v['handle']} {v['title']} {statement}"
-            tweets.append(t)
+            t = f"{v['handle']} {v['title']}, {statement}"
+            api.update_status(f"{v['handle']}", t)
+        break
     
-    return tweets
+    #return tweets
 
 def lastweek_stats():
     
@@ -122,9 +134,12 @@ def lastweek_stats():
             statement = statement.replace("in your state", "in your city").replace("in District", "in the District")
             
         
-        tweets_by_state = create_tweet(engine, state, statement)
+        tweets_by_state = create_tweet(engine, state, statement, api)
         
         for ea in tweets_by_state:
             tweets_all_states.append(ea)
 
     return tweets_all_states
+
+
+lastweek_stats()

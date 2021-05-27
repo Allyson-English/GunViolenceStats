@@ -3,6 +3,7 @@
 
 <head>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='main.css') }}" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" integrity="sha512-iBBXm8fW90+nuLcSKlbmrPcLa0OT92xO1BIsZ+ywDWZCvqsWgccV3gFoRBv0z+8dLJgyAHIhR35VZc2oM/gI1w==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <title>Preventable Gun Deaths WebApp</title>
 </head>
 
@@ -11,37 +12,40 @@
         <div class="headline">
             It has been <counter>zero days</counter> since the last incident of gun violence in the United
             States.
-
         </div>
 
         <div class="todays_numbers"><b>{{ today }}</b>: In the past 24 hours, across {{ states_count }} states,
-            there have been at
-            least
+            there have been 
             {{ deaths }} deaths
             and
             {{ injuries }} injuries attributed to
-            gun violence.</div>
+            gun violence.
+                <span><a href="{{twitter_statement}}" target="_blank" rel="noopener noreferrer"><i class="fab fa-twitter"></i></a></span>
+        </div>
         <br /><br />
+
+    <div id="chart" class="chart"></div>
 
         <center>
 
-	    <div class="boundary">
+        <div class="boundary">
             <div class="flex-container">
                 {% for i in states_names %}
-                <div>{{ i }}<br /><br />
-                    Fatalities: {{ df[df.state == i]['killed'].sum() }} Injuries: {{ df[df.state == i]['injured'].sum() }}</div>
+                    <div>
+                        {{ i }}<br /><br />
+                        {% if df[df.state == i]['killed'].sum() != 0 and df[df.state == i]['injured'].sum() != 0 %}
+                            <i>Fatalities: {{ df[df.state == i]['killed'].sum() }} Injuries: {{ df[df.state == i]['injured'].sum() }}{% endif %}</i>
+                        {% if df[df.state == i]['killed'].sum() != 0 and df[df.state == i]['injured'].sum() == 0 %}
+                            <i>Fatalities: {{ df[df.state == i]['killed'].sum() }}{% endif %}</i>
+                        {% if df[df.state == i]['killed'].sum() == 0 and df[df.state == i]['injured'].sum() != 0 %}
+                            <i>Injuries: {{ df[df.state == i]['injured'].sum() }}{% endif %}</i>
+                    </div>
                 {% endfor %}
             </div>
-	    </div>
+        </div>
         </center>
 
 
-        <h4><i>This information comes from the Gun Violence Archive.</i>
-            <br />
-            <br />
-            If you're interested in learning more about what you can do to support gun control, visit
-            https://everytown.org/
-        </h4>
+        <h4><i>This information comes from the <a href="//www.gunviolencearchive.org/" target="_blank" rel="noopener noreferrer">Gun Violence Archive.</a></i></h4>
 </body>
-
 </html>

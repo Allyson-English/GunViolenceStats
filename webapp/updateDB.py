@@ -6,7 +6,7 @@ import sqlalchemy
 from sqlalchemy import Table, Column, Integer, String, MetaData
 
 ### Update Table Function
-def update_table(db_pathway, page = 5):
+def update_table(db_pathway, page = 10):
     
     # Scrape data from website
     
