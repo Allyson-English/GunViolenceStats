@@ -6,11 +6,12 @@ import sqlalchemy
 from sqlalchemy import Table, Column, Integer, String, MetaData
 
 ### Update Table Function
-def update_table(db_pathway, page = 10):
+def update_table(db_pathway, page = 14):
     
     # Scrape data from website
     
     for i in range(0, page):
+        print(i)
         weblink = f'https://www.gunviolencearchive.org/last-72-hours?page={i}'
         page = requests.get(weblink, headers=headers)
         page = page.text
