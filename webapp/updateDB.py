@@ -1,4 +1,5 @@
-from headers import headers, db_path
+from headers import headers, twitter_api_key, twitter_api_key_secret, twitter_access_token, twitter_token_secret, db_path
+import tweepy
 import requests
 import pandas as pd
 import sqlite3
@@ -6,42 +7,84 @@ import sqlalchemy
 from sqlalchemy import Table, Column, Integer, String, MetaData
 
 ### Update Table Function
-def update_table(db_pathway, page = 14):
-    
+def update_table(db_pathway, page_number = 14):
+
+    auth = tweepy.OAuthHandler(twitter_api_key, twitter_api_key_secret)
+    auth.set_access_token(twitter_access_token, twitter_token_secret)
+
+    api = tweepy.API(auth)
+
     # Scrape data from website
+
+    print("starting scrape")
     
-    for i in range(0, page):
-        print(i)
+    for i in range(0, page_number):
+
+        engine = sqlalchemy.create_engine(f"sqlite:///{db_path}")
+
+        with engine.connect() as conn:
+            query = f"""SELECT MAX(entry) FROM gun_violence;"""
+            max = pd.read_sql(query, conn).iloc[0][0]
+        n_entry = 1
+        
         weblink = f'https://www.gunviolencearchive.org/last-72-hours?page={i}'
         page = requests.get(weblink, headers=headers)
         page = page.text
-    
-    
+        
         # Use pandas read_html function to pull the current table from the website 
         df = pd.read_html(page, header=0, index_col=0)
         df = df[0].reset_index().drop(columns = ['Operations'])
         df.columns = ['date', 'state', 'city', 'address', 'killed', 'injured']
+        
+        df['day'] = df['date'].apply(lambda x: int(x.split()[1].replace(" ","").replace(",","")))
+        df['month'] = df['date'].apply(lambda x: x.split()[0].replace(" ","").replace(",",""))
+        df['year'] = df['date'].apply(lambda x: int(x.split()[-1].replace(" ","").replace(",","")))
+        df['date'] = pd.to_datetime(df['date'])
+
+        df = df[['date', 'day', 'month', 'year', 'state', 'city', 'address', 'killed', 'injured']]
+        
 
         for i in range(len(df)):
-            clean_add = str(df['address'][i])
+            
+            clean_entrynum = int(n_entry+max)
+            clean_date = df['date'][i]
+            clean_day = int(df['day'][i])
+            clean_month = str(df['month'][i])
+            clean_year = int(df['year'][i])
+            clean_state = str(df['state'][i])
+            
             clean_city = str(df['city'][i])
-            clean_add = clean_add.replace("(","").replace(",","").replace("'","").replace(")","")
             clean_city = clean_city.replace("(","").replace(",","").replace("'","").replace(")","")
-            df.loc[i, 'address'] = clean_add
-            df.loc[i, 'city'] = clean_city
+            
+            clean_addr = str(df['address'][i])
+            clean_addr = clean_addr.replace("(","").replace(",","").replace("'","").replace(")","")
+            
+            clean_killed = int(df['killed'][i])
+            clean_injured = int(df['injured'][i])
 
-        newrow_insert(db_pathway, df)
-    
-        
+            if clean_killed + clean_injured >= 4:
+                clean_ms = True
+            if not clean_killed + clean_injured == 4:
+                clean_ms = False
+
+            evaluate_entry(db_pathway, clean_entrynum, clean_date, clean_day, clean_month, clean_year, clean_state, clean_city, clean_addr, clean_killed, clean_injured, clean_ms)
+            n_entry += 1
+       
 ### If duplicate date exists, delete 
-def delete_duplicate(db_pathway, date_temp, state_temp, city_temp, address_temp):
+def delete_duplicate(db_pathway, clean_date, clean_state, clean_city, clean_addr, clean_killed, clean_injured):
     
     sqliteConnection = sqlite3.connect(db_pathway)
 
     try:
         cursor = sqliteConnection.cursor()
 
-        del_statement = f"""DELETE FROM gun_violence WHERE date = '{date_temp}'  AND state = '{state_temp}'  AND city = '{city_temp}'  AND address = '{address_temp}';"""
+        del_statement = f"""DELETE FROM gun_violence 
+                            WHERE date = '{clean_date}' 
+                            AND state = '{clean_state}' 
+                            AND city = '{clean_city}'
+                            AND address = '{clean_addr}'
+                            AND killed = '{clean_killed}'
+                            AND injured = '{clean_injured}';"""
         cursor.execute(del_statement)
         sqliteConnection.commit()
         cursor.close()
@@ -53,23 +96,30 @@ def delete_duplicate(db_pathway, date_temp, state_temp, city_temp, address_temp)
             sqliteConnection.close()
     
 ### After ensuring the row will not be a duplicate, add new row 
-def add_row(metadata, gun_violence, engine, date_temp, state_temp, city_temp, address_temp, killed_temp, injured_temp):
+def add_row(metadata, db, engine, clean_entrynum, clean_date, clean_day, clean_month, clean_year, clean_state, clean_city, clean_addr, clean_killed, clean_injured, clean_ms):
 
     metadata.create_all(engine)
     
-    ins = gun_violence.insert().values(date = date_temp, 
-                                   state = state_temp, 
-                                   city = city_temp, 
-                                   address = address_temp, 
-                                   killed = int(killed_temp), 
-                                   injured = int(injured_temp))
+    ins = db.insert().values(
+                                entry = clean_entrynum,
+                                date = clean_date,
+                                day = clean_day,
+                                month = clean_month,
+                                year = clean_year,
+                                state = clean_state,
+                                city = clean_city,
+                                address = clean_addr,
+                                killed = clean_killed,
+                                injured = clean_injured,
+                                mass_shooting = clean_ms
+                                   )
 
     with engine.connect() as conn:
         conn.execute(ins)
     
     
 ### Insert Rows SQL Function
-def newrow_insert(db_pathway, data):
+def evaluate_entry(db_pathway, clean_entrynum, clean_date, clean_day, clean_month, clean_year, clean_state, clean_city, clean_addr, clean_killed, clean_injured, clean_ms):
 
     # Define database pathway and establish SQL connection
     # Add echo = True after the sql path argument to see a print out of the SQL being executed
@@ -87,35 +137,28 @@ def newrow_insert(db_pathway, data):
     # If the row does not already exist in the database, it is inserted
     # This successfully avoids adding duplicate rows
 
-    for row in range(len(data)):
-            date_temp = data['date'][row]
-            state_temp = data['state'][row]
-            city_temp = data['city'][row]
-            address_temp = data['address'][row]
-            killed_temp = data['killed'][row]
-            injured_temp = data['injured'][row]
 
-            with engine.connect() as conn:
-                query = f"""SELECT *
-                FROM gun_violence
-                WHERE date = '{date_temp}' 
-                AND state = '{state_temp}' 
-                AND city = '{city_temp}' 
-                AND address = '{address_temp}';"""
+    with engine.connect() as conn:
+        query = f"""SELECT *
+        FROM gun_violence
+        WHERE date = '{clean_date}' 
+        AND state = '{clean_state}' 
+        AND city = '{clean_city}'
+        AND address = '{clean_addr}';"""
 
-                df = pd.read_sql(query, conn)
+        df = pd.read_sql(query, conn)
 
-                if df.empty == True:
+        if df.empty == True:
 
-                    add_row(metadata, gun_violence, engine, date_temp, state_temp, city_temp, address_temp, killed_temp, injured_temp)
+            add_row(metadata, gun_violence, engine, clean_entrynum, clean_date, clean_day, clean_month, clean_year, clean_state, clean_city, clean_addr, clean_killed, clean_injured, clean_ms)
+        
+        else:
 
-                elif df['killed'][0] != killed_temp or df['injured'][0] != injured_temp:
+            for i in range(len(df)):
+                if df['killed'][i] != clean_killed or df['injured'][i] != clean_injured:
 
-                    delete_duplicate(db_path, date_temp, state_temp, city_temp, address_temp)
-
-                    add_row(metadata, gun_violence, engine, date_temp, state_temp, city_temp, address_temp, killed_temp, injured_temp)
-                else:
-                    pass
+                    delete_duplicate(db_path, clean_date, clean_state, clean_city, clean_addr, clean_killed, clean_injured)
+                    add_row(metadata, gun_violence, engine, clean_entrynum, clean_date, clean_day, clean_month, clean_year, clean_state, clean_city, clean_addr, clean_killed, clean_injured, clean_ms)
 
                     
                     
@@ -127,8 +170,9 @@ engine = sqlalchemy.create_engine(f'sqlite:///{db_path}')
 with engine.connect() as conn:
     query1 = """SELECT * FROM gun_violence;"""
     df1 = pd.read_sql(query1, conn)
+
     
 if not df1.duplicated().unique()[0]:
-    print(len(df1))
+    print("No duplicates found. Database length: ", len(df1))
 else:
     print("There are duplicates")

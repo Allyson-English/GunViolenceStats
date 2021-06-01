@@ -50,6 +50,10 @@ with engine.connect() as conn:
     
 with engine.connect() as conn:
     historical.to_sql('gun_violence', conn, if_exists='append')
+
+
+
+    
     
 # Simple query to make sure everything is running smoothly (it is!) 
 

@@ -36,10 +36,13 @@ engine = sqlalchemy.create_engine(f"sqlite:///{db_path}")
 
 with engine.connect() as conn:
     query = f"""SELECT * FROM gun_violence
-    WHERE date = '{today}' AND killed > 0 OR date = '{today}' AND injured > 0
-    OR date = '{yesterday}' AND killed > 0 OR date = '{yesterday}' AND injured > 0
+    WHERE day = '{today_date}' AND month = '{today_month}' AND year = '{today_year}' AND killed > 0 
+    OR day = '{today_date}' AND month = '{today_month}' AND year = '{today_year}' AND injured > 0 
+    OR day = '{yesterday_date}' AND month = '{yesterday_month}' AND year = '{yesterday_year}' AND killed > 0
+    OR day = '{yesterday_date}' AND month = '{yesterday_month}' AND year = '{yesterday_year}' AND injured > 0
     GROUP BY state;"""
     df = pd.read_sql(query, conn)
+    df = df.drop_duplicates()
 
 states_count = len(df)
 states_names = df["state"].unique()
@@ -73,3 +76,13 @@ for state in states_names:
             
             
     
+with engine.connect() as conn:
+    query = f"""SELECT * FROM gun_violence
+    WHERE injured >= 4 OR killed >=4 OR injured+killed >=4;"""
+    df_mass_shootings = pd.read_sql(query, conn)
+
+    df_mass_shootings = df[df.date.str.endswith(today_year)]
+
+df['MassShooting'] = df['killed'] + df['injured']
+
+MS = df[df.MassShooting >= 4]
