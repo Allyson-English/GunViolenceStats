@@ -49,6 +49,7 @@ states_names = df["state"].unique()
 deaths = df["killed"].sum()
 injuries = df["injured"].sum()
 
+
 # make sure it will be singular if there is only one death/ injury
 
 twitter_statement = f"In the last 24 hours, across {states_count} US states, there have been {deaths} deaths and {injuries} injuries attributed to gun violence."
