@@ -61,11 +61,11 @@ for state in states_names:
     if temp.killed.sum() >= 3:
         
         if temp.injured.sum() > 2:
-            daily_statement = f"In the past 24 hours, there have been {temp.killed.sum()} deaths and {temp.injured.sum()} injuries due to gun violence in {state}. What are {state} lawmakers doing to curb there epidemic of gun violence in our country and in their home state?"
+            daily_statement = f"In the past 24 hours, there have been {temp.killed.sum()} deaths and {temp.injured.sum()} injuries due to gun violence in {state}. What are {state} lawmakers doing to curb the epidemic of gun violence in our country and in their home state?"
             api.update_status(daily_statement)
         
         else:
-            daily_statement = f"In the past 24 hours, there have been {temp.killed.sum()} deaths due to gun violence in {state}. What are {state} lawmakers doing to curb there epidemic of gun violence in our country and in their home state?"
+            daily_statement = f"In the past 24 hours, there have been {temp.killed.sum()} deaths due to gun violence in {state}. What are {state} lawmakers doing to curb the epidemic of gun violence in our country and in their home state?"
             api.update_status(daily_statement)
         
     if temp.injured.sum() >= 5:
