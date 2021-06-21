@@ -36,7 +36,7 @@ def grab_new_data(db_pathway, page_number = 14):
 
     return new_data.drop_duplicates().reset_index(drop=True)
 
-def import_data(data_to_add):
+def import_data(df):
 
     engine = sqlalchemy.create_engine(f"sqlite:///{db_path}")
     with engine.connect() as conn:
