@@ -37,7 +37,8 @@ with engine.connect() as conn:
         temp_full = f"{temp_month} {temp_date}, {temp_year}"
         
         query = f"""SELECT * FROM gun_violence
-            WHERE date = '{temp_full}' AND killed > 0 OR date = '{temp_full}' AND injured > 0
+            WHERE day = '{temp_date}' AND month = '{temp_month}' AND year = '{temp_year}' AND killed > 0 
+            OR day = '{temp_date}' AND month = '{temp_month}' AND year = '{temp_year}' AND injured > 0 
             GROUP BY state;"""
         
         df = pd.read_sql(query, conn)
@@ -47,8 +48,7 @@ with engine.connect() as conn:
         week_of_data = week_of_data.append(df)
   
 # broad statement about gun violence rates in America
-last_week_statement = f"Across the United States, there have been {week_of_data.killed.sum()} deaths and {week_of_data.injured.sum()} injuries due to gun violence in the past week. America needs sensible gun policy now."
-#api.update_status(last_week_statement)
+last_week_statement = f"In the  past week, across the United States, there have been {week_of_data.killed.sum()} deaths and {week_of_data.injured.sum()} injuries due to gun violence. America needs sensible gun policy now."
 
 # look at each state for any particularly large numbers that should be reported
 for state in state_names:
@@ -67,3 +67,5 @@ for state in state_names:
     if temp.injured.sum() >= 5 and not temp.killed.sum() >= 10:
         statement = f"In {state}, {temp.injured.sum()} individuals sustained injuries as a result of firearms over the last week. What are {state} policymakers doing to enact sensible gun policy?"
         api.update_status(statement)
+        
+api.update_status(last_week_statement)

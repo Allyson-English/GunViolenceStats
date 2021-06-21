@@ -7,25 +7,14 @@ import sqlalchemy
 from sqlalchemy import Table, Column, Integer, String, MetaData
 
 ### Update Table Function
-def update_table(db_pathway, page_number = 14):
-
-    auth = tweepy.OAuthHandler(twitter_api_key, twitter_api_key_secret)
-    auth.set_access_token(twitter_access_token, twitter_token_secret)
-
-    api = tweepy.API(auth)
+def grab_new_data(db_pathway, page_number = 14):
 
     # Scrape data from website
-
     print("starting scrape")
+
+    new_data = pd.DataFrame()
     
     for i in range(0, page_number):
-
-        engine = sqlalchemy.create_engine(f"sqlite:///{db_path}")
-
-        with engine.connect() as conn:
-            query = f"""SELECT MAX(entry) FROM gun_violence;"""
-            max = pd.read_sql(query, conn).iloc[0][0]
-        n_entry = 1
         
         weblink = f'https://www.gunviolencearchive.org/last-72-hours?page={i}'
         page = requests.get(weblink, headers=headers)
@@ -43,32 +32,43 @@ def update_table(db_pathway, page_number = 14):
 
         df = df[['date', 'day', 'month', 'year', 'state', 'city', 'address', 'killed', 'injured']]
         
+        new_data = new_data.append(df)
 
-        for i in range(len(df)):
-            
-            clean_entrynum = int(n_entry+max)
-            clean_date = df['date'][i]
-            clean_day = int(df['day'][i])
-            clean_month = str(df['month'][i])
-            clean_year = int(df['year'][i])
-            clean_state = str(df['state'][i])
-            
-            clean_city = str(df['city'][i])
-            clean_city = clean_city.replace("(","").replace(",","").replace("'","").replace(")","")
-            
-            clean_addr = str(df['address'][i])
-            clean_addr = clean_addr.replace("(","").replace(",","").replace("'","").replace(")","")
-            
-            clean_killed = int(df['killed'][i])
-            clean_injured = int(df['injured'][i])
+    return new_data.drop_duplicates().reset_index(drop=True)
 
-            if clean_killed + clean_injured >= 4:
-                clean_ms = True
-            if not clean_killed + clean_injured == 4:
-                clean_ms = False
+def import_data(data_to_add):
 
-            evaluate_entry(db_pathway, clean_entrynum, clean_date, clean_day, clean_month, clean_year, clean_state, clean_city, clean_addr, clean_killed, clean_injured, clean_ms)
-            n_entry += 1
+    engine = sqlalchemy.create_engine(f"sqlite:///{db_path}")
+    with engine.connect() as conn:
+        query = f"""SELECT MAX(entry) FROM gun_violence;"""
+        max = pd.read_sql(query, conn).iloc[0][0]
+    n_entry = 1
+
+    for i in range(len(df)):
+        
+        clean_entrynum = int(n_entry+max)
+        clean_date = df['date'][i]
+        clean_day = int(df['day'][i])
+        clean_month = str(df['month'][i])
+        clean_year = int(df['year'][i])
+        clean_state = str(df['state'][i])
+        
+        clean_city = str(df['city'][i])
+        clean_city = clean_city.replace("(","").replace(",","").replace("'","").replace(")","")
+        
+        clean_addr = str(df['address'][i])
+        clean_addr = clean_addr.replace("(","").replace(",","").replace("'","").replace(")","")
+        
+        clean_killed = int(df['killed'][i])
+        clean_injured = int(df['injured'][i])
+
+        if clean_killed + clean_injured >= 4:
+            clean_ms = True
+        if not clean_killed + clean_injured == 4:
+            clean_ms = False
+
+        evaluate_entry(db_path, clean_entrynum, clean_date, clean_day, clean_month, clean_year, clean_state, clean_city, clean_addr, clean_killed, clean_injured, clean_ms)
+        n_entry += 1
        
 ### If duplicate date exists, delete 
 def delete_duplicate(db_pathway, clean_date, clean_state, clean_city, clean_addr, clean_killed, clean_injured):
@@ -162,7 +162,8 @@ def evaluate_entry(db_pathway, clean_entrynum, clean_date, clean_day, clean_mont
 
                     
                     
-update_table(db_path)
+new_data_pull = grab_new_data(db_path)
+import_data(new_data_pull)
 engine = sqlalchemy.create_engine(f'sqlite:///{db_path}')
 
 # Query can be run to ensure that duplicates do not exist in database

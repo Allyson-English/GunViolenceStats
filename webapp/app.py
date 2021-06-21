@@ -18,7 +18,7 @@ def index():
     
     DC_tz = tz.gettz("US/Eastern")
     today = datetime.now(tz=DC_tz)
-    
+
     today_month = today.strftime('%B')
     today_date = int(today.strftime('%d'))
     today_year = today.strftime('%Y')
@@ -30,15 +30,18 @@ def index():
 
     today = f"{today_month} {today_date}, {today_year}"
     yesterday = f"{yesterday_month} {yesterday_date}, {yesterday_year}"
-    
+
     engine = sqlalchemy.create_engine(f"sqlite:///{db_path}")
-    
+
     with engine.connect() as conn:
         query = f"""SELECT * FROM gun_violence
-        WHERE date = '{today}' AND killed > 0 OR date = '{today}' AND injured > 0
-        OR date = '{yesterday}' AND killed > 0 OR date = '{yesterday}' AND injured > 0
+        WHERE day = '{today_date}' AND month = '{today_month}' AND year = '{today_year}' AND killed > 0 
+        OR day = '{today_date}' AND month = '{today_month}' AND year = '{today_year}' AND injured > 0 
+        OR day = '{yesterday_date}' AND month = '{yesterday_month}' AND year = '{yesterday_year}' AND killed > 0
+        OR day = '{yesterday_date}' AND month = '{yesterday_month}' AND year = '{yesterday_year}' AND injured > 0
         GROUP BY state;"""
         df = pd.read_sql(query, conn)
+        df = df.drop_duplicates()
 
     states_count = len(df)
     states_names = df["state"].unique()
