@@ -1,0 +1,22 @@
+version: '3'
+services:
+  gun-violence-app:
+    build: ./
+    volumes:
+      - ./webapp:/app
+      - /home/ubuntu/zerodays.db:/data/zerodays.db
+    ports:
+      - 80:80
+    environment:
+      - FLASK_APP=app.py
+      - FLASK_DEBUG=1
+      - 'RUN=flask run --host=0.0.0.0 --port=80'
+    command: flask run --host=0.0.0.0 --port=80
+    # command: python3 /app/updateDB.py
+    
+    
+    # Infinite loop, to keep it alive, for debugging
+    # command: bash -c "while true; do echo 'sleeping...' && sleep 10; done"
+
+# Cron tab commands
+# docker run -v /home/ubuntu/zerodays.db:/data/zerodays.db gunviolencestats_gun-violence-app:latest python3 /app/updateDB.py
