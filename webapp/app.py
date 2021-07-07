@@ -13,6 +13,9 @@ from IPython.display import Image
 
 app = Flask(__name__)
 
+import plotly.express as px
+
+
 @app.route("/")
 def index():
     
@@ -47,11 +50,14 @@ def index():
     states_names = df["state"].unique()
     deaths = df["killed"].sum()
     injuries = df["injured"].sum()
+
+    data_canada = px.data.gapminder().query("country == 'Canada'")
+    fig = px.bar(data_canada, x='year', y='pop')
     
     twitter_statement = f"https://www.twitter.com/intent/tweet?url=In the past 24 hours, across {states_count} states, there have been {deaths} deaths and {injuries} injuries attributed to gun violence in the United States. Track daily incidence of gun violence @ZeroDaysLive"
     
     return render_template("index.html", df=df, states_count=states_count, states_names=states_names,
-                           today=today, deaths=deaths, injuries=injuries, twitter_statement=twitter_statement)
+                           today=today, deaths=deaths, injuries=injuries, twitter_statement=twitter_statement, fig=fig)
 
 
 @app.route("/<state>")
