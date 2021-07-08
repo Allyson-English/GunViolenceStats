@@ -5,6 +5,7 @@
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='main.css') }}" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" integrity="sha512-iBBXm8fW90+nuLcSKlbmrPcLa0OT92xO1BIsZ+ywDWZCvqsWgccV3gFoRBv0z+8dLJgyAHIhR35VZc2oM/gI1w==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <title>Preventable Gun Deaths WebApp</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 </head>
 
 <body>
@@ -22,12 +23,9 @@
             gun violence.
                 <span><a href="{{twitter_statement}}" target="_blank" rel="noopener noreferrer"><i class="fab fa-twitter"></i></a></span>
         </div>
-        <br /><br />
-
-    <div id="chart" class="chart"></div>
-
-        <center>
-
+        
+        <center> <div>{{ plot_vis() }}</div> </center>
+        <br><br>
         <div class="boundary">
             <div class="flex-container">
                 {% for i in states_names %}

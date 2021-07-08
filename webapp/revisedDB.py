@@ -2,6 +2,7 @@ import requests
 import pandas as pd
 import sqlalchemy
 from headers import db_path as db_path_old
+import censusgeocode as cg
 
 
 # get data from existing database to copy over
@@ -103,3 +104,156 @@ df.tail()
 with engine.connect() as conn:
     query = f"""SELECT MAX(entry) FROM gun_violence;"""
     max = pd.read_sql(query, conn).iloc[0][0]
+
+
+### Creating FIPS Mapping Table-- Reading in and Formatting Table
+
+fips = pd.read_csv("/home/pi/Desktop/FIPSCodes.csv", index_col=0).drop(columns=['FIPS County Code'])
+
+def clean_ids(x, desired_len):
+
+    x = str(x)
+    while len(x) < desired_len:
+        x = "0"+ x
+    return x
+    
+fips['FIPSCd'] = fips['FIPSCd'].apply(lambda x: clean_ids(x, 5))
+fips['STATEFP'] = fips['STATEFP'].apply(lambda x: clean_ids(x, 2))
+fips['COUNTYFP'] = fips['COUNTYFP'].apply(lambda x: clean_ids(x, 3))
+
+result = cg.address('75 Dayton Road', city='Redding', state='CT', zipcode='06896')
+
+county_id = result[0]['geographies']['Counties'][0]['COUNTY']
+
+state_id = result[0]['geographies']['States'][0]['STATE']
+
+county_id = clean_ids(county_id, 3)
+state_id = clean_ids(state_id, 2)
+
+address_fips = state_id + county_id
+print(address_fips)
+
+fips[fips.FIPSCd == address_fips].head()
+
+fips.head()
+
+
+# Creating FIPS Mapping Table table
+
+with engine.connect() as conn:
+
+    try:
+        conn.execute("DROP TABLE fips_mapping;")
+    except:
+        print("The gun_violence table does not exist yet.")
+
+    conn.execute("""
+    CREATE TABLE IF NOT EXISTS gun_violence
+        ('INDEX' INT,
+        'STATEFP' VARCHAR(2), 
+        'COUNTYFP' VARCHAR(3), 
+        'TRACTCE', INT,
+        'AFFGEOID' VARCHAR(30), 
+        'GEOID' INT, 
+        'NAME' FLOAT, 
+        'LSAD' VARCHAR(10),
+        'ALAND' INT, 
+        'AWATER' INT, 
+        'FIPSCd' VARCHAR(5), 
+        'County Name' VARCHAR(25), 
+        'State' VARCHAR(25)
+    );
+    """)
+
+with engine.connect() as conn:
+    fips.to_sql('fips_mapping', conn, if_exists='append')
+
+with engine.connect() as conn:
+    query = """SELECT * FROM gun_violence LIMIT 5;"""
+    df = pd.read_sql(query, conn)
+    display(df.head())
+
+# Creating State and State Acronym Table
+
+us_state_abbrev = {
+    'Alabama': 'AL',
+    'Alaska': 'AK',
+    'American Samoa': 'AS',
+    'Arizona': 'AZ',
+    'Arkansas': 'AR',
+    'California': 'CA',
+    'Colorado': 'CO',
+    'Connecticut': 'CT',
+    'Delaware': 'DE',
+    'District of Columbia': 'DC',
+    'Florida': 'FL',
+    'Georgia': 'GA',
+    'Guam': 'GU',
+    'Hawaii': 'HI',
+    'Idaho': 'ID',
+    'Illinois': 'IL',
+    'Indiana': 'IN',
+    'Iowa': 'IA',
+    'Kansas': 'KS',
+    'Kentucky': 'KY',
+    'Louisiana': 'LA',
+    'Maine': 'ME',
+    'Maryland': 'MD',
+    'Massachusetts': 'MA',
+    'Michigan': 'MI',
+    'Minnesota': 'MN',
+    'Mississippi': 'MS',
+    'Missouri': 'MO',
+    'Montana': 'MT',
+    'Nebraska': 'NE',
+    'Nevada': 'NV',
+    'New Hampshire': 'NH',
+    'New Jersey': 'NJ',
+    'New Mexico': 'NM',
+    'New York': 'NY',
+    'North Carolina': 'NC',
+    'North Dakota': 'ND',
+    'Northern Mariana Islands':'MP',
+    'Ohio': 'OH',
+    'Oklahoma': 'OK',
+    'Oregon': 'OR',
+    'Pennsylvania': 'PA',
+    'Puerto Rico': 'PR',
+    'Rhode Island': 'RI',
+    'South Carolina': 'SC',
+    'South Dakota': 'SD',
+    'Tennessee': 'TN',
+    'Texas': 'TX',
+    'Utah': 'UT',
+    'Vermont': 'VT',
+    'Virgin Islands': 'VI',
+    'Virginia': 'VA',
+    'Washington': 'WA',
+    'West Virginia': 'WV',
+    'Wisconsin': 'WI',
+    'Wyoming': 'WY'
+}
+
+states_tbl = pd.DataFrame({'STATE': [x for x in us_state_abbrev.keys()], 'ST_ACRONYM': [x for x in us_state_abbrev.values()]})
+states_tbl = states_tbl.set_index('STATE')
+
+with engine.connect() as conn:
+
+    try:
+        conn.execute("DROP TABLE states;")
+    except:
+        print("The states table does not exist yet.")
+
+    conn.execute("""
+    CREATE TABLE IF NOT EXISTS states
+        ('state' VARCHAR(20), 
+        'st_acronym' VARCHAR(5)
+    );
+    """)
+
+with engine.connect() as conn:
+    states_tbl.to_sql('states', conn, if_exists='append')
+
+with engine.connect() as conn:
+    query = "SELECT * FROM states;"
+    df = pd.read_sql(query, conn)
