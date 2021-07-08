@@ -135,10 +135,9 @@ def index():
     deaths = df["killed"].sum()
     injuries = df["injured"].sum()
 
-       
     twitter_statement = f"https://www.twitter.com/intent/tweet?url=In the past 24 hours, across {states_count} states, there have been {deaths} deaths and {injuries} injuries attributed to gun violence in the United States. Track daily incidence of gun violence @ZeroDaysLive"
     
-    return render_template("index.html", df=df, states_count=states_count, states_names=states_names,
+    return render_template("index.html", df=df, zero=zero, states_count=states_count, states_names=states_names,
                            today=today, deaths=deaths, injuries=injuries, twitter_statement=twitter_statement)
 
 
