@@ -48,9 +48,8 @@ def my_utility_processor():
             df = pd.read_sql(query, conn)
             df = df.drop_duplicates()
 
-            # data
+
         states = df['st_acronym'].to_list()
-        title_text = f"Injuries and Death Attributed to Gun Violence By State \n {yesterday}-{today}"
 
         # plotly express bar chart
         fig = px.choropleth(data_frame=df,
@@ -58,25 +57,14 @@ def my_utility_processor():
                             locationmode="USA-states", color=df.incidents.to_list(),
                             scope="usa",
                             template="plotly_dark",
-                            hover_name=df.state.to_list(),
-                            hover_data = {
-                             'Killed': df.killed.to_list(), # customize hover for column of y attribute
-                             'Injured':df.injured.to_list()
-                            #  'locations': [False for i in range(len(df.state))]
-                            }
+                            hover_name=df.state.to_list()
             )
-        fig.update_layout(paper_bgcolor="black")
-        fig.update_layout(paper_bgcolor="black")
-        fig.update_layout(coloraxis_colorbar=dict(
-            title="Incidents <br>",
-            # lenmode="pixels", len=200,
-            ticks="outside",
-            dtick=1
+        fig.update_layout(paper_bgcolor="black", # background color of graph
+            coloraxis_colorbar=dict( # heatmap colors
+            title="Incidents <br>", # heatmap label
+            ticks="outside", #heatmap label tickmarks
+            dtick=1 # intervals for heatmap
         ))
-        # fig.update_layout(
-        #     font_family="Fjord One",
-        #     title_font_family="Fjord One"
-        # )
         fig.update_layout(
             title={
                 'text': f'Incidents of Gun Violence in United States <br> <i>{yesterday}-{today}</i><br><br>',
@@ -84,9 +72,9 @@ def my_utility_processor():
                 'x':0.5,
                 'xanchor': 'center',
                 'yanchor': 'top'}, font=dict(
-        family="Fjord One",
-        size=16
-    ))
+            family="Fjord One",
+            size=16
+        ))
         fig.update_yaxes(automargin=False)
         fig.update_traces(hovertemplate=None)
 # )
@@ -137,7 +125,7 @@ def index():
 
     twitter_statement = f"https://www.twitter.com/intent/tweet?url=In the past 24 hours, across {states_count} states, there have been {deaths} deaths and {injuries} injuries attributed to gun violence in the United States. Track daily incidence of gun violence @ZeroDaysLive"
     
-    return render_template("index.html", df=df, zero=zero, states_count=states_count, states_names=states_names,
+    return render_template("index.html", df=df, states_count=states_count, states_names=states_names,
                            today=today, deaths=deaths, injuries=injuries, twitter_statement=twitter_statement)
 
 
@@ -150,7 +138,7 @@ def state_stats(state):
 
     with engine.connect() as conn:
         query1 = f"""SELECT * FROM gun_violence WHERE state IN
-                    (SELECT state from state_names WHERE abbreviations = '{state}');"""
+                    (SELECT state from states WHERE st_acronym = '{state}');"""
         dc_df = pd.read_sql(query1, conn)
 
 
