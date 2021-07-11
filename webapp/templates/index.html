@@ -9,6 +9,8 @@
 </head>
 
 <body>
+
+
     <div class="pagewidth">
         <div class="headline">
             It has been <counter>zero days</counter> since the last incident of gun violence in the United
@@ -25,12 +27,22 @@
         </div>
         
         <center> <div>{{ plot_vis() }}</div> </center>
-        <br><br>
+        <br><br><br><br>
+
+
+        <!-- <select name= states_names method="GET" action="/">
+            {% for st in colours %}
+            <option value= "{{ st }}" SELECTED>{{ st }}</option>"
+            {% endfor %}
+        </select> -->
+
         <div class="boundary">
             <div class="flex-container">
                 {% for i in states_names %}
                     <div>
-                        {{ i }}<br /><br />
+                        <!-- <button class=st_button>{{ i }}</button> -->
+                        {{ i }}
+                        <br><br>
                         {% if df[df.state == i]['killed'].sum() != 0 and df[df.state == i]['injured'].sum() != 0 %}
                             <i>Fatalities: {{ df[df.state == i]['killed'].sum() }} Injuries: {{ df[df.state == i]['injured'].sum() }}{% endif %}</i>
                         {% if df[df.state == i]['killed'].sum() != 0 and df[df.state == i]['injured'].sum() == 0 %}

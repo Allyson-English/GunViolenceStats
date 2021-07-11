@@ -7,6 +7,33 @@ html, body {
     width: 1500px; 
   }
 
+  .navigationbar {
+    /* container where site navigation buttons sit */
+     text-align: center;
+     color: red;
+     z-index: 10;
+     position: fixed;
+     top: 0;
+     width: 100%;
+     background-color: #F8F8F8;
+     overflow: hidden;
+     margin: auto;
+     width: 1500px; 
+   }
+
+   .column {
+    float: left;
+    width: 33.33%;
+  }
+  
+  /* Clear floats after the columns */
+  .row:after {
+    content: "";
+    display: table;
+    clear: both;
+  }
+
+
 counter {
     font-family: "Fjord One"; 
     font-size: 90%; 
@@ -102,4 +129,12 @@ padding: 10px;
 border-bottom: 4px solid white;
 box-shadow: 5px 10px black;
 border-radius: 8px;
+}
+
+.st_button {
+    height:75px;
+    width:100%;
+    font-family: "Fjord One"; 
+    color: white; 
+    background-color: transparent;
 }

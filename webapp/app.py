@@ -50,6 +50,7 @@ def my_utility_processor():
 
 
         states = df['st_acronym'].to_list()
+        df['text'] = df.apply(lambda x: f"Killed: {x.killed}<br>Injured: {x.injured}<br><b><i>{x.state}</i></b>", axis=1)
 
         # plotly express bar chart
         fig = px.choropleth(data_frame=df,
@@ -57,27 +58,39 @@ def my_utility_processor():
                             locationmode="USA-states", color=df.incidents.to_list(),
                             scope="usa",
                             template="plotly_dark",
-                            hover_name=df.state.to_list()
+                            hover_name=df.text.to_list()
             )
         fig.update_layout(paper_bgcolor="black", # background color of graph
             coloraxis_colorbar=dict( # heatmap colors
-            title="Incidents <br>", # heatmap label
+            title={
+                'text': "Injuries and Fatalities <br><i>Combined Total</i><br> &nbsp;", # as with html, &nbsp; forces an empty space above bar to avoid crowding
+                'side': 'top' #can be middle, bottom or top; this is default
+            },
             ticks="outside", #heatmap label tickmarks
+            yanchor= "top",     
+            # thicknessmode="pixels", thickness=50,
+            # lenmode="pixels", len=200, 
+            y=1, 
+            x=.75, #x sets how close the color bar is to graph; .5 is right in the middle of it
             dtick=1 # intervals for heatmap
         ))
         fig.update_layout(
+            dragmode = False,
             title={
                 'text': f'Incidents of Gun Violence in United States <br> <i>{yesterday}-{today}</i><br><br>',
                 'y':.1,
                 'x':0.5,
                 'xanchor': 'center',
-                'yanchor': 'top'}, font=dict(
-            family="Fjord One",
-            size=16
-        ))
-        fig.update_yaxes(automargin=False)
-        fig.update_traces(hovertemplate=None)
-# )
+                'yanchor': 'top'
+                }, 
+            font=dict(
+                family="Fjord One",
+                size=16
+                )
+        )
+        fig.update_traces(hovertemplate=None) #override default hover variables; customize preferences using title text option (above)
+
+
         return Markup(plot(fig,
                 include_plotlyjs=False,
                 output_type='div',
@@ -88,7 +101,7 @@ def my_utility_processor():
 
     return dict(plot_vis=plot_vis)
 
-@app.route("/")
+@app.route("/", methods=['GET'])
 def index():
     
     DC_tz = tz.gettz("US/Eastern")
@@ -123,7 +136,7 @@ def index():
     deaths = df["killed"].sum()
     injuries = df["injured"].sum()
 
-    twitter_statement = f"https://www.twitter.com/intent/tweet?url=In the past 24 hours, across {states_count} states, there have been {deaths} deaths and {injuries} injuries attributed to gun violence in the United States. Track daily incidence of gun violence @ZeroDaysLive"
+    twitter_statement = f"https://www.twitter.com/intent/tweet?url=In the past 24 hours, across {states_count} US states, there have been {deaths} deaths and {injuries} injuries attributed to gun violence. Track daily incidence of gun violence @ZeroDaysLive."
     
     return render_template("index.html", df=df, states_count=states_count, states_names=states_names,
                            today=today, deaths=deaths, injuries=injuries, twitter_statement=twitter_statement)
