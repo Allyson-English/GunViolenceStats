@@ -5,15 +5,32 @@ services:
     volumes:
       - ./webapp:/app
       - /home/ubuntu/zerodays.db:/data/zerodays.db
-    ports:
-      - 80:80
-    environment:
-      - FLASK_APP=app.py
-      - FLASK_DEBUG=1
-      - 'RUN=flask run --host=0.0.0.0 --port=80'
-    command: flask run --host=0.0.0.0 --port=80
+    # ports:
+    #   - 80:80
+    # environment:
+    #   - FLASK_APP=app.py
+    #   - FLASK_DEBUG=1
+    #   - 'RUN=flask run --host=0.0.0.0 --port=80'
+    # command: flask run --host=0.0.0.0 --port=80
     # command: python3 /app/updateDB.py
     
+    labels:
+      - 'traefik.enable=true'
+      - 'traefik.http.routers.my-app.rule=Host(`example.com`)'
+      - 'traefik.http.routers.my-app.tls=true'
+      - 'traefik.http.routers.my-app.tls.certresolver=lets-encrypt'
+  
+  traefik:
+    image: traefik:2.1
+    restart: always
+    ports:
+      - '80:80'
+      - '443:443'
+    volumes:
+    - ./traefik:/etc/traefik
+    - /var/run/docker.sock:/var/run/docker.sock:ro
+    labels:
+      - "traefik.port=8080"
     
     # Infinite loop, to keep it alive, for debugging
     # command: bash -c "while true; do echo 'sleeping...' && sleep 10; done"
