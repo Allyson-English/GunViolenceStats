@@ -143,21 +143,21 @@ def index():
 
 
 
-@app.route("/<state>")
-def state_stats(state):
+# @app.route("/<state>")
+# def state_stats(state):
 
-    engine = sqlalchemy.create_engine(f"sqlite:///{db_path}")
-
-
-    with engine.connect() as conn:
-        query1 = f"""SELECT * FROM gun_violence WHERE state IN
-                    (SELECT state from states WHERE st_acronym = '{state}');"""
-        dc_df = pd.read_sql(query1, conn)
+#     engine = sqlalchemy.create_engine(f"sqlite:///{db_path}")
 
 
-    dc_df_len = len(dc_df)
+#     with engine.connect() as conn:
+#         query1 = f"""SELECT * FROM gun_violence WHERE state IN
+#                     (SELECT state from states WHERE st_acronym = '{state}');"""
+#         dc_df = pd.read_sql(query1, conn)
 
-    return render_template("state_stats.html", dc_df=dc_df, dc_df_len=dc_df_len)
+
+#     dc_df_len = len(dc_df)
+
+#     return render_template("state_stats.html", dc_df=dc_df, dc_df_len=dc_df_len)
 
 
 
