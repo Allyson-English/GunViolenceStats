@@ -1,5 +1,6 @@
 from headers import headers, twitter_api_key, twitter_api_key_secret, twitter_access_token, twitter_token_secret, db_path
 import tweepy
+from datetime import datetime
 import requests
 import pandas as pd
 import sqlite3
@@ -102,7 +103,7 @@ def add_row(metadata, db, engine, clean_entrynum, clean_date, clean_day, clean_m
     
     ins = db.insert().values(
                                 entry = clean_entrynum,
-                                date = clean_date,
+                                date = datetime.strptime(clean_date, '%Y-%m-%d'),
                                 day = clean_day,
                                 month = clean_month,
                                 year = clean_year,

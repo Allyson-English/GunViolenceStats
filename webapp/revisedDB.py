@@ -54,7 +54,8 @@ def MS(text):
 new_format['mass_shooting'] = new_format['vic_count'].apply(lambda x: MS(x))
 new_format = new_format.drop(columns=['vic_count'])
 new_format.head()
-new_format = new_format.reset_index().drop(columns='index')
+new_format = new_format.reset_index().rename(columns={'index':'entry'})
+new_format = new_format.set_index('entry')
 new_format.head()
 
       
@@ -75,7 +76,7 @@ with engine.connect() as conn:
 
     conn.execute("""
     CREATE TABLE IF NOT EXISTS gun_violence
-        ('index' INT,
+        ('entry' INT,
         'date' DATE,
         'day' INT,
         'month' VARCHAR (15),
