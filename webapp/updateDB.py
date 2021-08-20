@@ -47,7 +47,7 @@ def import_data(df):
     for i in range(len(df)):
         
         clean_entrynum = int(n_entry+max)
-        clean_date = df['date'][i]
+        clean_date = str(df['date'][i]).split()[0]
         clean_day = int(df['day'][i])
         clean_month = str(df['month'][i])
         clean_year = int(df['year'][i])
@@ -142,13 +142,13 @@ def evaluate_entry(db_pathway, clean_entrynum, clean_date, clean_day, clean_mont
         query = f"""SELECT *
         FROM gun_violence
         WHERE date = '{clean_date}' 
-        AND state = '{clean_state}' 
+        AND (state = '{clean_state}' 
         AND city = '{clean_city}'
-        AND address = '{clean_addr}';"""
+        AND address = '{clean_addr}');"""
 
         df = pd.read_sql(query, conn)
 
-        if df.empty == True:
+        if df.empty:
 
             add_row(metadata, gun_violence, engine, clean_entrynum, clean_date, clean_day, clean_month, clean_year, clean_state, clean_city, clean_addr, clean_killed, clean_injured, clean_ms)
         
@@ -156,7 +156,6 @@ def evaluate_entry(db_pathway, clean_entrynum, clean_date, clean_day, clean_mont
 
             for i in range(len(df)):
                 if df['killed'][i] != clean_killed or df['injured'][i] != clean_injured:
-
                     delete_duplicate(db_path, clean_date, clean_state, clean_city, clean_addr, clean_killed, clean_injured)
                     add_row(metadata, gun_violence, engine, clean_entrynum, clean_date, clean_day, clean_month, clean_year, clean_state, clean_city, clean_addr, clean_killed, clean_injured, clean_ms)
 
@@ -172,6 +171,16 @@ with engine.connect() as conn:
     query1 = """SELECT * FROM gun_violence;"""
     df1 = pd.read_sql(query1, conn)
 
+
+with engine.connect() as conn:
+    query1 = """SELECT * FROM gun_violence 
+    WHERE date = '{clean_date}' 
+    AND state = '{clean_state}' 
+    AND city = '{clean_city}'
+    AND address = '{clean_addr}'
+    AND killed = '{clean_killed}'
+    AND injured = '{clean_injured}';"""
+    test = pd.read_sql(query1, conn)
     
 if not df1.duplicated().unique()[0]:
     print("No duplicates found. Database length: ", len(df1))

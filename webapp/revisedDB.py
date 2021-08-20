@@ -25,7 +25,7 @@ new.head()
 def pull_date(text):
     
     text = text.split()
-    return int(text.split()[1].replace(" ","").replace(",",""))
+    return int(text[1].replace(" ","").replace(",",""))
 
 def pull_month(text):
     
@@ -47,21 +47,20 @@ new_format = new_format[['date', 'day', 'month', 'year', 'state', 'city', 'addre
 new_format['vic_count'] = new_format['killed']+new_format['injured']
 
 def MS(text):
-
     if int(text) >= 4:
         return True
-    
     return False
+
 new_format['mass_shooting'] = new_format['vic_count'].apply(lambda x: MS(x))
 new_format = new_format.drop(columns=['vic_count'])
 new_format.head()
-new_format = new_format.reset_index().set_index('index')
+new_format = new_format.reset_index().drop(columns='index')
 new_format.head()
 
       
 # Define database pathway and establish SQL connection
 
-db_path = '/home/pi/Desktop/zerodays.db'
+db_path = 'zerodays_new.db'
 engine = sqlalchemy.create_engine(f'sqlite:///{db_path}')
 
 # Creating SQL table
@@ -70,12 +69,13 @@ with engine.connect() as conn:
 
     try:
         conn.execute("DROP TABLE gun_violence;")
+        print("Dropped Table")
     except:
         print("The gun_violence table does not exist yet.")
 
     conn.execute("""
     CREATE TABLE IF NOT EXISTS gun_violence
-        ('entry' INT,
+        ('index' INT,
         'date' DATE,
         'day' INT,
         'month' VARCHAR (15),
@@ -90,7 +90,7 @@ with engine.connect() as conn:
     """)
     
 with engine.connect() as conn:
-    new.to_sql('gun_violence', conn, if_exists='append')
+    new_format.to_sql('gun_violence', conn, if_exists='append')
 
 
 # Simple query to make sure everything is running smoothly (it is!) 
