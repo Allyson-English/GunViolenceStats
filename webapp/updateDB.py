@@ -17,7 +17,7 @@ def grab_new_data(db_pathway, page_number = 14):
     
     for i in range(0, page_number):
         
-        weblink = f'https://www.gunviolencearchive.org/last-72-hours?page={i}'
+        weblink = f"https://www.gunviolencearchive.org/last-72-hours?page={i}"
         page = requests.get(weblink, headers=headers)
         page = page.text
         
@@ -43,6 +43,8 @@ def import_data(df):
     with engine.connect() as conn:
         query = f"""SELECT MAX(entry) FROM gun_violence;"""
         max = pd.read_sql(query, conn).iloc[0][0]
+        if not max:
+            max = 0
     n_entry = 1
 
     for i in range(len(df)):
@@ -63,9 +65,9 @@ def import_data(df):
         clean_killed = int(df['killed'][i])
         clean_injured = int(df['injured'][i])
 
-        if clean_killed + clean_injured >= 4:
+        if clean_killed >= 4:
             clean_ms = True
-        if not clean_killed + clean_injured == 4:
+        if not clean_killed == 5:
             clean_ms = False
 
         evaluate_entry(db_path, clean_entrynum, clean_date, clean_day, clean_month, clean_year, clean_state, clean_city, clean_addr, clean_killed, clean_injured, clean_ms)
@@ -164,6 +166,7 @@ def evaluate_entry(db_pathway, clean_entrynum, clean_date, clean_day, clean_mont
                     
 new_data_pull = grab_new_data(db_path)
 import_data(new_data_pull)
+print("Done")
 engine = sqlalchemy.create_engine(f'sqlite:///{db_path}')
 
 # Query can be run to ensure that duplicates do not exist in database

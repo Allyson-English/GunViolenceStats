@@ -146,10 +146,10 @@ with engine.connect() as conn:
     try:
         conn.execute("DROP TABLE fips_mapping;")
     except:
-        print("The gun_violence table does not exist yet.")
+        print("The fips_mapping table does not exist yet.")
 
     conn.execute("""
-    CREATE TABLE IF NOT EXISTS gun_violence
+    CREATE TABLE IF NOT EXISTS fips_mapping
         ('INDEX' INT,
         'STATEFP' VARCHAR(2), 
         'COUNTYFP' VARCHAR(3), 
