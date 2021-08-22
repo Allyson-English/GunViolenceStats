@@ -131,7 +131,7 @@ def index():
         df = pd.read_sql(query, conn)
         df = df.drop_duplicates()
 
-    states_count = len(df)
+    states_count = len(df["state"].unique())
     states_names = df["state"].unique()
     deaths = df["killed"].sum()
     injuries = df["injured"].sum()
