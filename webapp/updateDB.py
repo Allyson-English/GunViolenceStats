@@ -24,7 +24,8 @@ def grab_new_data(db_pathway, page_number = 14):
         # Use pandas read_html function to pull the current table from the website 
         df = pd.read_html(page, header=0, index_col=0)
         df = df[0].reset_index().drop(columns = ['Operations'])
-        df.columns = ['date', 'state', 'city', 'address', 'killed', 'injured']
+        df.columns = ['id', 'date', 'state', 'city', 'address', 'killed', 'injured']
+        df = df.drop(columns=['id'])
         
         df['day'] = df['date'].apply(lambda x: int(x.split()[1].replace(" ","").replace(",","")))
         df['month'] = df['date'].apply(lambda x: x.split()[0].replace(" ","").replace(",",""))
